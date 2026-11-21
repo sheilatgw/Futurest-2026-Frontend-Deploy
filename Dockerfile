@@ -1,0 +1,26 @@
+FROM oven/bun:1-alpine AS deps
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+RUN rm -f ~/.bunfig.toml
+
+FROM oven/bun:1-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_PUBLIC_RUN_MODE=production
+ENV NEXT_PUBLIC_API_URL_DEV=https://api.futurest.id
+ENV NEXT_PUBLIC_API_URL_PROD=https://api.futurest.id
+ENV SITE_URL=https://futurest.id
+ENV NEXT_PUBLIC_API_UNIVERSITIES_API=KP9tAH1WBlwPb45YqhVouKAnA4lBJaTycLMmvqpWIBaAAOm9pZ
+ENV NEXT_PUBLIC_API_SOCIAL_MEDIA_API=52f5fdcaabmshfa437882aea78d3p163a29jsnd6618d631dfe
+RUN bun run build
+
+FROM gcr.io/distroless/nodejs20-debian12 AS runner
+WORKDIR /app
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+EXPOSE 3000
+ENV HOSTNAME="0.0.0.0"
+CMD ["server.js"]
