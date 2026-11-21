@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { RegisterOptions, get, useFormContext } from "react-hook-form";
+import {
+  FieldError,
+  FieldValues,
+  RegisterOptions,
+  get,
+  useFormContext,
+} from "react-hook-form";
 
 import ErrorMessage from "@/components/form/error-message";
 import HelperText from "@/components/form/helper-text";
@@ -47,10 +53,10 @@ export default function Input({
   const {
     register,
     formState: { errors },
-  } = useFormContext();
+  } = useFormContext<FieldValues>();
 
   const [showPassword, setShowPassword] = useState(false);
-  const error = get(errors, id);
+  const error = get(errors, id) as FieldError | undefined;
 
   return (
     <div className="w-full space-y-2">
@@ -166,7 +172,9 @@ export default function Input({
         )}
       </div>
 
-      {!hideError && error && <ErrorMessage>{error.message}</ErrorMessage>}
+      {!hideError && error?.message && (
+        <ErrorMessage>{error.message}</ErrorMessage>
+      )}
       {helperText && (
         <HelperText helperTextClassName={helperTextClassName}>
           {helperText}

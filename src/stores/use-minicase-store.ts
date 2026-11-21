@@ -39,16 +39,12 @@ const useMinicaseFormStore = create<RegisterFormState>()(
       fileAttachment: initialFile,
 
       setFile: (type, file) => {
-        set((state) => {
-          const newFileAttachment = {
+        set((state: RegisterFormState) => ({
+          fileAttachment: {
             ...state.fileAttachment,
             [type]: file,
-          };
-
-          return {
-            fileAttachment: newFileAttachment,
-          };
-        });
+          },
+        }));
       },
 
       resetFiles: () => {
